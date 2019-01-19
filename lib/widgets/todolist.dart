@@ -56,6 +56,42 @@ class _TodoListState extends State<TodoList> {
     }
 
   }
+  Color _priorityColor(Priority priority) {
+    Color color;
+    switch(priority) {
+      case Priority.high:
+        color = Colors.red;
+        break;
+      case Priority.medium:
+        color = Colors.yellow;
+        break;
+      case Priority.low:
+        color = Colors.green;
+        break;
+      default:
+        color = Colors.green;
+    }
+    return color;
+
+  }
+
+  Icon _priorityIcon(Priority priority) {
+    Icon icon;
+   switch(priority) {
+     case Priority.high:
+       icon = Icon(Icons.donut_small);
+       break;
+     case Priority.medium:
+       icon = Icon(Icons.donut_small);
+       break;
+     case Priority.low:
+       icon = Icon(Icons.donut_small);
+       break;
+     default:
+       icon = Icon(Icons.donut_small);
+   }
+   return icon;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +105,8 @@ class _TodoListState extends State<TodoList> {
                   elevation: 1.0,
                   child: ListTile(
                       leading: CircleAvatar(
-                          backgroundColor: Colors.green,
-                          child: Icon(Icons.play_arrow)),
+                          backgroundColor: _priorityColor(item.priority),
+                          child: _priorityIcon(item.priority)),
                       title: Text(item.title),
                       subtitle: Text(item.description ?? ''),
                       trailing: GestureDetector(

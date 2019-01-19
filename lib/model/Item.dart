@@ -38,6 +38,16 @@ class Item {
       this.endTime,
       this.priority});
 
+  Item.clone(Item item) {
+    this.id = item.id;
+    this.title = item.title;
+    this.description = item.description;
+    this.longitude = item.longitude;
+    this.latitude = item.latitude;
+    this.startTime = item.startTime;
+    this.endTime = item.endTime;
+    this.priority = item.priority;
+  }
   Item.from(Map<String, dynamic> map) {
 
     if (map[idCol] != null) {
@@ -75,7 +85,11 @@ class Item {
 
     this.priority = Priority.low;
     if (map[priorityCol] != null) {
-      this.priority = map[priorityCol];
+      try {
+        this.priority = Priority.values[map[priorityCol]];
+      } catch (e){
+        this.priority = Priority.low;
+      }
     }
   }
 }

@@ -12,7 +12,7 @@ class TodoApp extends StatelessWidget {
     return new MaterialApp(
         title: 'Todo',
         theme: new ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.orange,
         ),
         home: TodoListHome());
   }
@@ -72,6 +72,7 @@ class _TodoListHomeState extends State<TodoListHome> {
     }));
 
     if (result == true) {
+      print("Updated");
       _todoListKey.currentState.didChangeDependencies();
       //final snackBar = SnackBar(content: new Text('New item added'));
       //_scaffoldKey.currentState.showSnackBar(snackBar);
