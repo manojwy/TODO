@@ -15,8 +15,6 @@ doc/api/
 # Files created by Android Studio
 .idea/
 
-ios/
-
 
 # Miscellaneous
 *.class

@@ -15,10 +15,11 @@ class ItemViewer extends StatefulWidget {
 class _ItemViewerState extends State<ItemViewer> {
   final _formKey = GlobalKey<FormState>();
   Item item;
-
-  _ItemViewerState(this.item);
+  Item localItem;
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+
+  _ItemViewerState(this.item);
 
   String appbarTitle = "Add Item";
 
@@ -27,34 +28,70 @@ class _ItemViewerState extends State<ItemViewer> {
     super.initState();
 
     if (item == null) {
-      item = Item(title: '', startTime: DateTime.now());
-      item.description = '';
+      localItem = Item(title: '', startTime: DateTime.now());
+      localItem.description = '';
+      localItem.priority = Priority.low;
     } else {
       appbarTitle = "Edit Item";
+      localItem = Item.clone(item);
     }
+
+    titleController.text = localItem.title;
+    descriptionController.text = localItem.description;
+
+    titleController.selection =
+        TextSelection.collapsed(offset: localItem.title.length);
+    descriptionController.selection =
+        TextSelection.collapsed(offset: localItem.description.length);
   }
 
   void saveItem() async {
     Navigator.pop(context, true);
 
-    print(item.title);
-    print(item.description);
-
-    if (item.id == null) {
+    if (localItem.id == null) {
       //fire an insert
-      await Repository.getDatabase()
-          .addItem(title: item.title, description: item.description);
+      await Repository.getDatabase().addItem(
+          title: localItem.title,
+          description: localItem.description,
+          priority: localItem.priority.index);
     } else {
       // fire an update
       await Repository.getDatabase().updateItem(
-          id: item.id, title: item.title, description: item.description);
+          id: localItem.id,
+          title: localItem.title,
+          description: localItem.description,
+          priority: localItem.priority.index);
     }
+  }
+
+  Priority _priorityFromString(String value) {
+    Priority priority = Priority.low;
+
+    for (int i = 0; i < Priority.values.length; i++) {
+      if (value ==
+          Priority.values[i].toString().split('.').last.toUpperCase()) {
+        priority = Priority.values[i];
+        break;
+      }
+    }
+
+    localItem.priority = priority;
+    print(priority.toString());
+    setState(() {});
+    return priority;
+  }
+
+  String _priorityAsString(Priority priority) {
+    if (priority == null) {
+      priority = Priority.low;
+    }
+    String value = priority.toString().split('.').last.toUpperCase();
+    return value;
   }
 
   @override
   Widget build(BuildContext context) {
-    titleController.text = item.title;
-    descriptionController.text = item.description;
+    TextStyle textStyle = TextStyle(fontSize: 16.0, color: Colors.black);
 
     return Scaffold(
       appBar: new AppBar(
@@ -68,42 +105,57 @@ class _ItemViewerState extends State<ItemViewer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 TextFormField(
+                  style: textStyle,
                   decoration: InputDecoration(labelText: 'Title'),
-//                  initialValue: item.title,
                   controller: titleController,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
                   validator: (value) {
-                    print('validator Title $value');
                     if (value.isEmpty) {
                       return 'Title should be non empty';
                     }
-                    item.title = value;
-                    setState(() {
-
-                    });
                   },
                   onFieldSubmitted: (value) {
-                    print('onFieldSubmitted Title $value');
-                    item.title = value;
-                    setState(() {
-                    });
+                    localItem.title = value;
                   },
                 ),
                 TextFormField(
+                  style: textStyle,
                   decoration: InputDecoration(labelText: 'Description'),
-//                  initialValue: item.description,
                   controller: descriptionController,
-                  validator: (value) {
-                    item.description = value;
-                    setState(() {
-                    });
-                  },
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {},
                   onFieldSubmitted: (value) {
-                    item.description = value;
-                    setState(() {
-
-                    });
-
+                    localItem.description = value;
                   },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Row(children: <Widget>[
+                    Text(
+                      "Priority",
+                      style: textStyle,
+                    ),
+                    Container(
+                      width: 20.0,
+                    ),
+                    DropdownButton<String>(
+                      items: Priority.values.map((priority) {
+                        String str = _priorityAsString(priority);
+                        str = str[0].toUpperCase() + str.substring(1).toLowerCase();
+                        return DropdownMenuItem<String>(
+                          value: _priorityAsString(priority),
+                          child: Text(str),
+                        );
+                      }).toList(),
+//                      style: textStyle,
+                      value: _priorityAsString(localItem.priority),
+                      onChanged: (String value) {
+                        _priorityFromString(value);
+                      },
+                    ),
+                  ]),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -111,14 +163,19 @@ class _ItemViewerState extends State<ItemViewer> {
                     children: <Widget>[
                       Expanded(
                         child: RaisedButton(
+                          color: Colors.lightGreen,
                           onPressed: () {
                             // Validate will return true if the form is valid, or false if
                             // the form is invalid.
+
                             if (_formKey.currentState.validate()) {
+                              localItem.title = titleController.text;
+                              localItem.description =
+                                  descriptionController.text;
                               saveItem();
                             }
                           },
-                          child: Text('Save'),
+                          child: Text('SAVE'),
                         ),
                       ),
                       Container(
@@ -126,10 +183,10 @@ class _ItemViewerState extends State<ItemViewer> {
                       ),
                       Expanded(
                         child: RaisedButton(
-                          color: Colors.deepPurple,
-                          child: Text("Cancel"),
-                          textColor: Colors.white,
-                          splashColor: Colors.yellow,
+                          color: Colors.amber,
+                          child: Text("CANCEL"),
+//                          textColor: Colors.white,
+//                          splashColor: Colors.yellow,
                           onPressed: () {
                             debugPrint("Cancel Button pressed");
                             Navigator.pop(context, false);

@@ -27,6 +27,7 @@ class DatabaseHelper {
     String databasePath = await getDatabasesPath();
 
     databasePath = join(databasePath, "todo.db");
+    print(databasePath);
 //    await deleteDatabase(databasePath);
     var db = await openDatabase(databasePath, version: 1, onCreate: _onCreate);
     return db;
@@ -66,19 +67,19 @@ class DatabaseHelper {
     return true;
   }
 
-  Future<bool> addItem({title, description}) async{
+  Future<bool> addItem({title, description, priority}) async{
     var db = await connection;
 
     var insertedTime = DateTime.now().millisecondsSinceEpoch;
 
-    var result = await db.rawQuery('INSERT INTO todo(title, description, startTime) values(\'$title\', \'$description\', $insertedTime)');
+    var result = await db.rawQuery('INSERT INTO todo(title, description, startTime, priority) values(\'$title\', \'$description\', $insertedTime, $priority)');
     return true;
   }
 
-  Future<bool> updateItem({id, title, description}) async{
+  Future<bool> updateItem({id, title, description, priority}) async{
     var db = await connection;
 
-    var result = await db.rawQuery('UPDATE todo set title = \'$title\', description = \'$description\' WHERE id = $id');
+    var result = await db.rawQuery('UPDATE todo set title = \'$title\', description = \'$description\', priority = $priority WHERE id = $id');
     return true;
   }
 
@@ -86,7 +87,7 @@ class DatabaseHelper {
   /// Get all items, will return a list
   Future<List<Item>> getAllItems() async{
     var db = await connection;
-    var result = await db.rawQuery('SELECT * FROM todo order by id asc');
+    var result = await db.rawQuery('SELECT * FROM todo order by priority asc');
     List<Item> items = [];
     for(Map<String, dynamic> item in result) {
       items.add(Item.from(item));
