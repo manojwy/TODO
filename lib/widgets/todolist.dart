@@ -4,6 +4,7 @@ import '../model/Item.dart';
 import '../data/repository.dart';
 import 'item_viewer.dart';
 
+
 class TodoList extends StatefulWidget {
   TodoList({Key key}) : super(key: key);
 
@@ -110,7 +111,11 @@ class _TodoListState extends State<TodoList> {
                       title: Text(item.title),
                       subtitle: Text(item.description ?? ''),
                       trailing: GestureDetector(
-                          child: const Icon(Icons.delete, color: Colors.grey),
+                          child: Container(
+                            width:48.0,
+                            height:48.0,
+                            child:const Icon(Icons.delete, color: Colors.grey),
+                          ),
                           onTap: () {
                             print("Pressed Delete");
                             _deleteItem(item.id);
